@@ -4,3 +4,4 @@ todo.md
 
 tests/.DS_Store
 tests/dummy_data/
+.aider*
