@@ -255,6 +255,41 @@ function M.last()
   return M.list()[1]
 end
 
+---Clean up invalid sessions where the working directory no longer exists
+---@return nil
+function M.clean()
+  local uv = vim.uv or vim.loop
+  local sessions = M.list()
+  local deleted = 0
+
+  for _, session in ipairs(sessions) do
+    -- Extract the file name without save_dir and .vim extension
+    local file = session:sub(#config.save_dir + 1, -5)
+    -- Split into directory and optional branch
+    local dir, branch = unpack(vim.split(file, "@@", { plain = true }))
+    -- Convert back from filesystem-safe representation
+    dir = dir:gsub("%%", "/")
+    if jit.os:find("Windows") then
+      dir = dir:gsub("^(%w)/", "%1:/")
+    end
+
+    -- Check if directory exists
+    if uv.fs_stat(dir) == nil then
+      -- Directory doesn't exist, delete the session file
+      M.fire("DeletePre", { path = session })
+      vim.fn.delete(vim.fn.expand(session))
+      M.fire("DeletePost", { path = session })
+      deleted = deleted + 1
+    end
+  end
+
+  if deleted > 0 then
+    vim.notify(string.format("Removed %d invalid session(s)", deleted), vim.log.levels.INFO)
+  else
+    vim.notify("No invalid sessions found", vim.log.levels.INFO)
+  end
+end
+
 ---Setup the plugin
 ---@param opts? table
 ---@return nil
