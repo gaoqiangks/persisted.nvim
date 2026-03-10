@@ -108,6 +108,7 @@ The plugin has a number of commands:
 - `:Persisted load_last` - Load the most recent session
 - `:Persisted delete` - Delete a session from a list
 - `:Persisted delete_current` - Delete the current session
+- `:Persisted clean` - Clean up invalid sessions where the working directory no longer exists
 
 **Telescope extension**
 
