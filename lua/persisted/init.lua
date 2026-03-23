@@ -238,9 +238,21 @@ function M.allowed_dir(opts)
 end
 
 ---Get an ordered list of sessions, sorted by modified time
+---@param filter? fun(session: string): boolean Optional filter function. Only sessions where filter(session) returns true are included.
 ---@return string[]
-function M.list()
+function M.list(filter)
   local sessions = vim.fn.glob(config.save_dir .. "*.vim", true, true)
+
+  -- Apply filter if provided and is a function
+  if type(filter) == "function" then
+    local filtered_sessions = {}
+    for _, session in ipairs(sessions) do
+      if filter(session) then
+        table.insert(filtered_sessions, session)
+      end
+    end
+    sessions = filtered_sessions
+  end
 
   table.sort(sessions, function(a, b)
     return uv.fs_stat(a).mtime.sec > uv.fs_stat(b).mtime.sec
