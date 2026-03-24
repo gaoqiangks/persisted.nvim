@@ -35,8 +35,10 @@ function M.session_finder(sessions)
     if jit and jit.os and jit.os:find("Windows") then
         dir_path = dir_path:gsub("^(%w)/", "%1:/")
     else
-        -- On Unix-like systems, prepend '/' to make it an absolute path
-        dir_path = "/" .. dir_path
+        -- On Unix-like systems, prepend '/' to make it an absolute path if not already absolute
+        if not dir_path:match("^/") then
+            dir_path = "/" .. dir_path
+        end
     end
     -- Replace home directory with ~
     local home = vim.fn.expand("~")
