@@ -38,7 +38,12 @@ function M.session_finder(sessions)
         -- On Unix-like systems, prepend '/' to make it an absolute path
         dir_path = "/" .. dir_path
     end
-    local display_path = vim.fn.fnamemodify(dir_path, ":p:~")
+    -- Replace home directory with ~
+    local home = vim.fn.expand("~")
+    local display_path = dir_path
+    if display_path:sub(1, #home) == home then
+        display_path = "~" .. display_path:sub(#home + 1)
+    end
     append(icons.dir, "PersistedTelescopeDir")
     append(display_path)
 
