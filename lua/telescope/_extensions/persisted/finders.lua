@@ -30,8 +30,14 @@ function M.session_finder(sessions)
     append(session.file_path == vim.v.this_session and (icons.selected .. " ") or "   ", "PersistedTelescopeSelected")
 
     -- session path
+    -- Convert to proper path and format with ~
+    local dir_path = session.dir_path:gsub("%%", "/")
+    if jit and jit.os and jit.os:find("Windows") then
+        dir_path = dir_path:gsub("^(%w)/", "%1:/")
+    end
+    local display_path = vim.fn.fnamemodify(dir_path, ":p:~")
     append(icons.dir, "PersistedTelescopeDir")
-    append(session.dir_path)
+    append(display_path)
 
     -- branch
     if session.branch then
