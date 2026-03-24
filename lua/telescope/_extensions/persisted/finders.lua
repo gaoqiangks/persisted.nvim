@@ -34,6 +34,9 @@ function M.session_finder(sessions)
     local dir_path = session.dir_path:gsub("%%", "/")
     if jit and jit.os and jit.os:find("Windows") then
         dir_path = dir_path:gsub("^(%w)/", "%1:/")
+    else
+        -- On Unix-like systems, prepend '/' to make it an absolute path
+        dir_path = "/" .. dir_path
     end
     local display_path = vim.fn.fnamemodify(dir_path, ":p:~")
     append(icons.dir, "PersistedTelescopeDir")
