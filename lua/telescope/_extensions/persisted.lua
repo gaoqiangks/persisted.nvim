@@ -34,7 +34,6 @@ local function list_sessions()
   for _, session in pairs(persisted.list()) do
     local session_name = escape_pattern(session, config.save_dir, "")
       :gsub("%%", sep)
-      :gsub(vim.fn.expand("~"), sep)
       :gsub("//", "")
       :sub(1, -5)
 
