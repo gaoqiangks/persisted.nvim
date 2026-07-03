@@ -169,8 +169,52 @@ The plugin comes with the following defaults:
           dir = "  ",
           branch = " ",
         },
+        -- List of prefix substitutions used to shorten displayed session paths,
+        -- e.g. { { from = "/mnt/c/Users/gaoqiang", to = "/mnt/c/~" } }
+        -- The longest matching "from" prefix wins. If no alias matches, the
+        -- home directory (if it is a prefix of the path) is replaced with "~".
+        -- Ignored if `display` is set.
+        path_aliases = {},
+
+        -- Optional function to fully customize how the session path is displayed
+        -- in the Telescope picker. Receives the absolute directory path (string)
+        -- and must return the string to render. Overrides `path_aliases`.
+        ---@type (fun(path: string): string)?
+        display = nil,
       },
     }
+<
+
+**Shortening long session paths in Telescope**
+
+By default, long paths are shortened by replacing the home directory with
+`~`. If you need more control (e.g. shortening a Windows user path under
+WSL), use `telescope.path_aliases` to declare prefix substitutions:
+
+>lua
+    require("persisted").setup({
+      telescope = {
+        path_aliases = {
+          { from = "/mnt/c/Users/gaoqiang", to = "/mnt/c/~" },
+        },
+      },
+    })
+<
+
+The longest matching `from` prefix wins, so you can declare multiple
+overlapping aliases. For full control over the displayed string (e.g. to
+apply Lua pattern-based substitutions or any custom logic), set
+`telescope.display` instead — it takes precedence over `path_aliases`:
+
+>lua
+    require("persisted").setup({
+      telescope = {
+        display = function(path)
+          -- `path` is the session's absolute directory path
+          return path:gsub("^/mnt/c/Users/gaoqiang", "/mnt/c/~")
+        end,
+      },
+    })
 <
 
 **What is saved in the session?**
