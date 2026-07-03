@@ -9,6 +9,34 @@ local no_icons = {
   branch = "",
 }
 
+---Shorten a path by replacing the longest matching configured prefix with its alias.
+---Falls back to replacing the home directory with "~" when no alias matches.
+---@param path string
+---@param aliases table? list of { from = string, to = string } prefix substitutions
+---@return string
+local function default_shorten_path(path, aliases)
+  local best_from, best_to
+  for _, alias in ipairs(aliases or {}) do
+    local from, to = alias.from or alias[1], alias.to or alias[2]
+    if from and to and path:sub(1, #from) == from then
+      if not best_from or #from > #best_from then
+        best_from, best_to = from, to
+      end
+    end
+  end
+
+  if best_from then
+    return best_to .. path:sub(#best_from + 1)
+  end
+
+  local home = vim.fn.expand("~")
+  if path:sub(1, #home) == home then
+    return "~" .. path:sub(#home + 1)
+  end
+
+  return path
+end
+
 ---Create a finder for persisted sessions
 ---@param sessions table
 function M.session_finder(sessions)
@@ -40,11 +68,16 @@ function M.session_finder(sessions)
             dir_path = "/" .. dir_path
         end
     end
-    -- Replace home directory with ~
-    local home = vim.fn.expand("~")
-    local display_path = dir_path
-    if display_path:sub(1, #home) == home then
-        display_path = "~" .. display_path:sub(#home + 1)
+    -- Shorten the path for display. Users can fully customize this by
+    -- providing config.telescope.display(path) which receives the absolute
+    -- directory path and returns the string to render. Otherwise, fall back
+    -- to config.telescope.path_aliases (longest prefix match wins), and
+    -- finally to replacing the home directory with "~".
+    local display_path
+    if type(config.telescope.display) == "function" then
+      display_path = config.telescope.display(dir_path) or dir_path
+    else
+      display_path = default_shorten_path(dir_path, config.telescope.path_aliases)
     end
     append(icons.dir, "PersistedTelescopeDir")
     append(display_path)

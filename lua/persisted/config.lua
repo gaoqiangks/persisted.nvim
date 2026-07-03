@@ -31,6 +31,18 @@ local defaults = {
       dir = "  ",
       branch = " ",
     },
+    -- List of prefix substitutions used to shorten displayed session paths,
+    -- e.g. { { from = "/mnt/c/Users/gaoqiang", to = "/mnt/c/~" } }
+    -- The longest matching "from" prefix wins. If no alias matches, the
+    -- home directory (if it is a prefix of the path) is replaced with "~".
+    -- Ignored if `display` is set.
+    path_aliases = {},
+
+    -- Optional function to fully customize how the session path is displayed
+    -- in the Telescope picker. Receives the absolute directory path (string)
+    -- and must return the string to render. Overrides `path_aliases`.
+    ---@type (fun(path: string): string)?
+    display = nil,
   },
 }
 
