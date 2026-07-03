@@ -257,8 +257,16 @@ function M.list(filter)
         sessions = filtered_sessions
     end
 
+    -- Pre-fetch each session's mtime once (instead of calling fs_stat on
+    -- every comparison during sort, which costs O(n log n) stat calls).
+    local mtimes = {}
+    for _, session in ipairs(sessions) do
+        local stat = uv.fs_stat(session)
+        mtimes[session] = stat and stat.mtime.sec or 0
+    end
+
     table.sort(sessions, function(a, b)
-        return uv.fs_stat(a).mtime.sec > uv.fs_stat(b).mtime.sec
+        return mtimes[a] > mtimes[b]
     end)
 
     return sessions
